@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Tài Khoản | TFT ACC SHOP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="account-detail.js" defer></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">🐧</div>
+        <span>TFT SHOP</span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Trang Chủ</a></li>
+        <li><a href="accounts.html">Danh Sách Tài Khoản</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="cart.html" class="nav-cart">
+          🛒
+          <div class="cart-badge" id="cart-badge"></div>
+        </a>
+        <div id="nav-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="detail-page">
+    <div class="container">
+      <div class="page-header">
+        <div class="breadcrumb">
+          <a href="/">Trang chủ</a> /
+          <a href="accounts.html">Tài khoản</a> /
+          <span>Chi tiết</span>
+        </div>
+      </div>
+
+      <div id="detail-container">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

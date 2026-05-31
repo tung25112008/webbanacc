@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | TFT ACC SHOP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="admin.js" defer></script>
+</head>
+
+<body>
+  <!-- Navbar Minimal -->
+  <nav class="navbar" style="background: var(--bg-card); border-bottom: 1px solid var(--border);">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">🐧</div>
+        <span>TFT SHOP <span style="font-size:1rem; font-weight:400; color:var(--red)">| ADMIN DASHBOARD</span></span>
+      </a>
+      <div style="display: flex; gap: 12px;">
+        <a href="/" class="btn btn-secondary btn-sm">Xem Website</a>
+        <button onclick="logout()" class="btn btn-danger btn-sm">Đăng xuất</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="admin-page">
+    <div class="container">
+
+      <!-- Stats -->
+      <div class="admin-stats">
+        <div class="admin-stat-card">
+          <div class="value" id="admin-stat-revenue">0 ₫</div>
+          <div class="label">Tổng Doanh Thu</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="value" id="admin-stat-orders">0</div>
+          <div class="label">Tổng Đơn Hàng</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="value" id="admin-stat-accounts">0</div>
+          <div class="label">Tổng Tài Khoản</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="value" id="admin-stat-users">0</div>
+          <div class="label">Người Dùng</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchTab('accounts')">Quản Lý Tài Khoản</button>
+        <button class="admin-tab" onclick="switchTab('orders')">Quản Lý Đơn Hàng</button>
+      </div>
+
+      <!-- Accounts Tab -->
+      <div id="accounts-tab">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+          <button class="btn btn-primary" onclick="openAccountModal()">+ Thêm Tài Khoản Mới</button>
+        </div>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tên Tài Khoản</th>
+                <th>Rank</th>
+                <th>Giá</th>
+                <th>Server</th>
+                <th>Trạng Thái</th>
+                <th>Hành Động</th>
+              </tr>
+            </thead>
+            <tbody id="admin-accounts-table">
+              <!-- Injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="orders-tab" style="display: none;">
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Mã Đơn</th>
+                <th>Người Mua</th>
+                <th>Tài Khoản</th>
+                <th>Thanh Toán</th>
+                <th>Phương Thức</th>
+                <th>Trạng Thái</th>
+                <th>Cập Nhật</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-table">
+              <!-- Injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Account Modal (Create/Edit) -->
+  <div class="modal-overlay" id="accountModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Thêm Tài Khoản</h3>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <form id="accountForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Tiêu đề *</label>
+            <input type="text" name="title" class="form-input" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label>Giá bán (VNĐ) *</label>
+              <input type="number" name="price" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label>Giá gốc (để hiển thị giảm giá)</label>
+              <input type="number" name="original_price" class="form-input">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label>Rank *</label>
+              <select name="rank_tier" class="form-select" required>
+                <option value="Challenger">Challenger</option>
+                <option value="Grandmaster">Grandmaster</option>
+                <option value="Master">Master</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Emerald">Emerald</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Gold">Gold</option>
+                <option value="Silver">Silver</option>
+                <option value="Bronze">Bronze</option>
+                <option value="Iron">Iron</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Server *</label>
+              <select name="server" class="form-select" required>
+                <option value="VN">Việt Nam (VN)</option>
+                <option value="SG">Singapore (SG)</option>
+                <option value="KR">Hàn Quốc (KR)</option>
+                <option value="NA">Bắc Mỹ (NA)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+            <div class="form-group">
+              <label>Level</label>
+              <input type="number" name="level" class="form-input" value="1">
+            </div>
+            <div class="form-group">
+              <label>Tacticians</label>
+              <input type="number" name="tacticians" class="form-input" value="0">
+            </div>
+            <div class="form-group">
+              <label>Little Legends</label>
+              <input type="number" name="little_legends" class="form-input" value="0">
+            </div>
+            <div class="form-group">
+              <label>Arenas</label>
+              <input type="number" name="arenas" class="form-input" value="0">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label>Trạng thái</label>
+              <select name="status" class="form-select">
+                <option value="available">Sẵn sàng (Available)</option>
+                <option value="reserved">Đang giữ (Reserved)</option>
+                <option value="sold">Đã bán (Sold)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nổi bật (Hiển thị trang chủ)</label>
+              <select name="is_featured" class="form-select">
+                <option value="1">Có</option>
+                <option value="0">Không</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Mô tả chi tiết</label>
+            <textarea name="description" class="form-textarea" rows="4"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Tài Khoản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</body>
+
+</html>

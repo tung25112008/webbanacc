@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giỏ Hàng | TFT ACC SHOP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="cart.js" defer></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">🐧</div>
+        <span>TFT SHOP</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/">Trang Chủ</a></li>
+        <li><a href="accounts.html">Danh Sách</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div id="nav-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="cart-page">
+    <div class="container">
+      <div class="page-header">
+        <h1>Giỏ Hàng Của Bạn</h1>
+      </div>
+
+      <div class="cart-layout">
+        <!-- Cart Items -->
+        <div class="cart-items" id="cart-items-container">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="cart-summary" id="cart-summary" style="display: none;">
+          <h3>Tổng Đơn Hàng</h3>
+          <div class="cart-summary-row">
+            <span>Số lượng:</span>
+            <span id="summary-count">0</span>
+          </div>
+          <div class="cart-summary-row total">
+            <span>Thành tiền:</span>
+            <span id="summary-total">0 ₫</span>
+          </div>
+          <button class="btn btn-primary" style="width: 100%; margin-top: 24px;" onclick="proceedToCheckout()">Tiến Hành
+            Thanh Toán</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

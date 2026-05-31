@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TFT ACC SHOP - Vũ Trụ Tài Khoản</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="home.js" defer></script>
+</head>
+
+<body>
+  <!-- Background Animation -->
+  <div class="bg-particles"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">🐧</div>
+        <span>TFT SHOP</span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/" class="active">Trang Chủ</a></li>
+        <li><a href="accounts.html">Danh Sách Tài Khoản</a></li>
+        <li><a href="#contact">Liên Hệ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="cart.html" class="nav-cart">
+          🛒
+          <div class="cart-badge" id="cart-badge"></div>
+        </a>
+        <div id="nav-auth"></div>
+        <button class="nav-toggle" id="nav-toggle">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Vũ Trụ Tài Khoản <span class="highlight">TFT Cao Cấp</span></h1>
+        <p>Khám phá bộ sưu tập tài khoản với các Linh Thú và Sân Đấu hiếm nhất dải ngân hà. Nâng tầm trải nghiệm cờ nhân
+          phẩm của bạn ngay hôm nay!</p>
+        <div class="hero-buttons">
+          <a href="accounts.html" class="btn btn-primary btn-lg">Khám Phá Ngay</a>
+          <a href="#contact" class="btn btn-secondary btn-lg">Tư Vấn Miễn Phí</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">10K+</div>
+          <div class="stat-label">Tài Khoản Đã Bán</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Bảo Hành An Toàn</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">24/7</div>
+          <div class="stat-label">Hỗ Trợ Trực Tuyến</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">5🚀</div>
+          <div class="stat-label">Giao Dịch Siêu Tốc</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Accounts Section -->
+  <section class="featured-accounts">
+    <div class="container">
+      <div class="section-header">
+        <h2>Tài Khoản <span class="highlight">Nổi Bật</span></h2>
+        <p>Những tài khoản hiếm có và xịn sò nhất đang chờ bạn rước về</p>
+      </div>
+
+      <div class="accounts-grid" id="featured-accounts">
+        <!-- Loading spinner will be injected here initially -->
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="accounts.html" class="btn btn-primary btn-lg">Xem Tất Cả Tài Khoản</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section" id="contact">
+    <div class="container">
+      <div class="section-header">
+        <h2>Liên Hệ <span class="highlight">Với Chúng Tôi</span></h2>
+        <p>Gặp khó khăn hoặc cần tư vấn? Đội ngũ hỗ trợ luôn sẵn sàng 24/7</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="contact-card">
+            <div class="contact-icon">📞</div>
+            <div>
+              <h3>Hotline</h3>
+              <p>0345157427</p>
+            </div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">💬</div>
+            <div>
+              <h3>Zalo Hỗ Trợ</h3>
+              <p>zalo.me/tftshop</p>
+            </div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">🎮</div>
+            <div>
+              <h3>Discord Group</h3>
+              <p>discord.gg/tftshop</p>
+            </div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">📧</div>
+            <div>
+              <h3>Email</h3>
+              <p>ngogiatu009@gmail.com</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-form">
+          <form onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã liên hệ! Lời nhắn đã được gửi đi.');">
+            <div class="form-group">
+              <input type="text" class="form-input" placeholder="Họ và tên của bạn" required>
+            </div>
+            <div class="form-group">
+              <input type="email" class="form-input" placeholder="Email liên hệ" required>
+            </div>
+            <div class="form-group">
+              <textarea class="form-input" rows="4" placeholder="Nội dung lời nhắn..." required
+                style="resize: vertical;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Gửi Tin Nhắn</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="/" class="nav-logo" style="margin-bottom: 20px;">
+            <div class="logo-icon">🐧</div>
+            <span>TFT SHOP</span>
+          </a>
+          <p style="color: var(--text-secondary);">Nền tảng mua bán tài khoản Đấu Trường Chân Lý uy tín, giao dịch tự
+            động nhanh chóng và an toàn tuyệt đối.</p>
+        </div>
+        <div class="footer-col">
+          <h3>Liên Kết Nhanh</h3>
+          <ul class="footer-links">
+            <li><a href="/">Trang Chủ</a></li>
+            <li><a href="accounts.html">Danh Sách Tài Khoản</a></li>
+            <li><a href="cart.html">Giỏ Hàng</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Hỗ Trợ Khách Hàng</h3>
+          <ul class="footer-links">
+            <li><a href="#">Hướng Dẫn Mua Hàng</a></li>
+            <li><a href="#">Chính Sách Bảo Hành</a></li>
+            <li><a href="#">Câu Hỏi Thường Gặp</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Kết Nối</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 12px;">Hotline: 0123.456.789</p>
+          <p style="color: var(--text-secondary); margin-bottom: 12px;">Email: support@tftshop.vn</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2024 TFT ACC SHOP. Bản quyền thuộc về Antigravity Agent.
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

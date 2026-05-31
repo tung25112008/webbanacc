@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh Sách Tài Khoản | TFT ACC SHOP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="accounts.js" defer></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">🐧</div>
+        <span>TFT SHOP</span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Trang Chủ</a></li>
+        <li><a href="accounts.html" class="active">Danh Sách Tài Khoản</a></li>
+        <li><a href="#contact">Liên Hệ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="cart.html" class="nav-cart">
+          🛒
+          <div class="cart-badge" id="cart-badge"></div>
+        </a>
+        <div id="nav-auth"></div>
+        <button class="nav-toggle" id="nav-toggle">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <main class="listings-page">
+    <div class="container">
+      <div class="listings-header">
+        <h1>Tất Cả Tài Khoản</h1>
+        <p>Tìm kiếm tài khoản TFT phù hợp nhất với bạn</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Tìm kiếm theo tên acc, ID hoặc mô tả...">
+      </div>
+
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>Rank</label>
+          <select id="filter-rank" class="form-select">
+            <option value="">Tất cả</option>
+            <option value="Challenger">Challenger</option>
+            <option value="Grandmaster">Grandmaster</option>
+            <option value="Master">Master</option>
+            <option value="Diamond">Diamond</option>
+            <option value="Emerald">Emerald</option>
+            <option value="Platinum">Platinum</option>
+            <option value="Gold">Gold</option>
+            <option value="Silver">Silver</option>
+            <option value="Bronze">Bronze</option>
+            <option value="Iron">Iron</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Mức giá</label>
+          <select id="filter-price" class="form-select">
+            <option value="">Tất cả</option>
+            <option value="0-500000">Dưới 500k</option>
+            <option value="500000-1000000">500k - 1 Triệu</option>
+            <option value="1000000-3000000">1 Triệu - 3 Triệu</option>
+            <option value="3000000-max">Trên 3 Triệu</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Máy chủ</label>
+          <select id="filter-server" class="form-select">
+            <option value="">Tất cả</option>
+            <option value="VN">Việt Nam (VN)</option>
+            <option value="SG">Singapore (SG)</option>
+            <option value="KR">Hàn Quốc (KR)</option>
+            <option value="NA">Bắc Mỹ (NA)</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Sắp xếp</label>
+          <select id="sort-select" class="form-select">
+            <option value="newest">Mới nhất</option>
+            <option value="price_asc">Giá: Thấp đến Cao</option>
+            <option value="price_desc">Giá: Cao đến Thấp</option>
+            <option value="rank">Rank: Cao đến Thấp</option>
+          </select>
+        </div>
+
+        <button class="btn btn-secondary" style="height: 46px;" onclick="resetFilters()">Mặc định</button>
+      </div>
+
+      <!-- Accounts Grid -->
+      <div class="accounts-grid" id="accounts-container">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none; padding-top:0;">
+        &copy; 2024 TFT ACC SHOP. Bản quyền thuộc về Antigravity Agent.
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>
