@@ -1,10 +1,11 @@
 const { DatabaseSync } = require('node:sqlite');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const fs = require('fs');
 
-// On Render: use /data (persistent disk). Locally: use __dirname
-const DB_DIR = process.env.NODE_ENV === 'production' ? '/data' : __dirname;
-const DB_PATH = path.join(DB_DIR, 'tft_shop.db');
+// Use /data (Render paid disk) if it exists, otherwise fall back to project dir
+const DATA_DIR = fs.existsSync('/data') ? '/data' : __dirname;
+const DB_PATH = path.join(DATA_DIR, 'tft_shop.db');
 
 function initDatabase() {
   const db = new DatabaseSync(DB_PATH);
