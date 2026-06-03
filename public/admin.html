@@ -13,13 +13,13 @@
 
 <body>
   <!-- Navbar Minimal -->
-  <nav class="navbar" style="background: var(--bg-card); border-bottom: 1px solid var(--border);">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+  <nav class="navbar">
+    <div class="container d-flex justify-between align-center">
       <a href="/" class="nav-logo">
         <div class="logo-icon">🐧</div>
         <span>TFT SHOP <span style="font-size:1rem; font-weight:400; color:var(--red)">| ADMIN DASHBOARD</span></span>
       </a>
-      <div style="display: flex; gap: 12px;">
+      <div class="d-flex gap-3">
         <a href="/" class="btn btn-secondary btn-sm">Xem Website</a>
         <button onclick="logout()" class="btn btn-danger btn-sm">Đăng xuất</button>
       </div>
@@ -57,7 +57,7 @@
 
       <!-- Accounts Tab -->
       <div id="accounts-tab">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+        <div class="d-flex justify-end mb-4">
           <button class="btn btn-primary" onclick="openAccountModal()">+ Thêm Tài Khoản Mới</button>
         </div>
         <div class="admin-table-wrapper">
@@ -81,7 +81,7 @@
       </div>
 
       <!-- Orders Tab -->
-      <div id="orders-tab" style="display: none;">
+      <div id="orders-tab" class="d-none">
         <div class="admin-table-wrapper">
           <table class="admin-table">
             <thead>
@@ -119,7 +119,7 @@
             <input type="text" name="title" class="form-input" required>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="d-grid grid-cols-2 gap-4">
             <div class="form-group">
               <label>Giá bán (VNĐ) *</label>
               <input type="number" name="price" class="form-input" required>
@@ -130,7 +130,7 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="d-grid grid-cols-2 gap-4">
             <div class="form-group">
               <label>Rank *</label>
               <select name="rank_tier" class="form-select" required>
@@ -157,7 +157,7 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+          <div class="d-grid grid-cols-4 gap-3">
             <div class="form-group">
               <label>Level</label>
               <input type="number" name="level" class="form-input" value="1">
@@ -176,7 +176,7 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="d-grid grid-cols-2 gap-4">
             <div class="form-group">
               <label>Trạng thái</label>
               <select name="status" class="form-select">
@@ -200,27 +200,27 @@
           </div>
 
           <!-- Credentials Section -->
-          <div style="border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 20px; background: rgba(16,185,129,0.04); margin-top: 4px;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+          <div class="admin-credentials-box">
+            <div class="d-flex align-center gap-2 mb-4">
               <span style="font-size: 1.3rem;">🔑</span>
               <div>
                 <div style="font-weight: 700; color: #10b981;">Thông Tin Đăng Nhập Acc Game</div>
                 <div style="font-size: 0.85rem; color: var(--text-secondary);">Sẽ được gửi cho người mua khi đơn hoàn thành</div>
               </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="d-grid grid-cols-2 gap-4">
               <div class="form-group">
                 <label>Username / Tên đăng nhập *</label>
-                <input type="text" name="acc_username" class="form-input" placeholder="VD: player123" style="border-color: rgba(16,185,129,0.4);">
+                <input type="text" name="acc_username" class="form-input input-green" placeholder="VD: player123">
               </div>
               <div class="form-group">
                 <label>Password / Mật khẩu *</label>
-                <input type="text" name="acc_password" class="form-input" placeholder="Mật khẩu acc game" style="border-color: rgba(16,185,129,0.4);">
+                <input type="text" name="acc_password" class="form-input input-green" placeholder="Mật khẩu acc game">
               </div>
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-group mb-0">
               <label>Email liên kết (tùy chọn)</label>
-              <input type="email" name="acc_email" class="form-input" placeholder="VD: example@gmail.com" style="border-color: rgba(16,185,129,0.4); margin-bottom: 0;">
+              <input type="email" name="acc_email" class="form-input input-green" placeholder="VD: example@gmail.com">
             </div>
           </div>
         </div>
