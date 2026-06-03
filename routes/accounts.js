@@ -96,24 +96,38 @@ module.exports = function(db) {
     if (!account) {
       return res.status(404).json({ error: 'Không tìm thấy tài khoản' });
     }
+    // Hide credentials from regular users
+    const isAdmin = req.headers.authorization && (() => {
+      try {
+        const jwt = require('jsonwebtoken');
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'tft_secret_key_2024');
+        return decoded.role === 'admin';
+      } catch(e) { return false; }
+    })();
+    if (!isAdmin) {
+      const { acc_username, acc_password, acc_email, ...safeAccount } = account;
+      return res.json({ account: safeAccount });
+    }
     res.json({ account });
   });
 
   // POST /api/accounts - Create (admin only)
   router.post('/', authenticateToken, requireAdmin, (req, res) => {
-    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured } = req.body;
+    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured, acc_username, acc_password, acc_email } = req.body;
 
     if (!title || !price || !rank_tier) {
       return res.status(400).json({ error: 'Vui lòng điền tên, giá và rank' });
     }
 
     const result = db.prepare(`
-      INSERT INTO accounts (title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO accounts (title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured, acc_username, acc_password, acc_email)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       title, description || '', parseInt(price), original_price ? parseInt(original_price) : null,
       rank_tier, parseInt(level) || 1, parseInt(little_legends) || 0, parseInt(arenas) || 0,
-      parseInt(tacticians) || 0, server || 'VN', images || '[]', is_featured ? 1 : 0
+      parseInt(tacticians) || 0, server || 'VN', images || '[]', is_featured ? 1 : 0,
+      acc_username || null, acc_password || null, acc_email || null
     );
 
     const account = db.prepare('SELECT * FROM accounts WHERE id = ?').get(Number(result.lastInsertRowid));
@@ -122,7 +136,7 @@ module.exports = function(db) {
 
   // PUT /api/accounts/:id - Update (admin only)
   router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
-    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, status, is_featured } = req.body;
+    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, status, is_featured, acc_username, acc_password, acc_email } = req.body;
 
     const existing = db.prepare('SELECT * FROM accounts WHERE id = ?').get(req.params.id);
     if (!existing) {
@@ -133,7 +147,8 @@ module.exports = function(db) {
       UPDATE accounts SET
         title = ?, description = ?, price = ?, original_price = ?, rank_tier = ?,
         level = ?, little_legends = ?, arenas = ?, tacticians = ?,
-        server = ?, images = ?, status = ?, is_featured = ?
+        server = ?, images = ?, status = ?, is_featured = ?,
+        acc_username = ?, acc_password = ?, acc_email = ?
       WHERE id = ?
     `).run(
       title || existing.title,
@@ -149,6 +164,9 @@ module.exports = function(db) {
       images || existing.images,
       status || existing.status,
       is_featured !== undefined ? (is_featured ? 1 : 0) : existing.is_featured,
+      acc_username !== undefined ? acc_username : existing.acc_username,
+      acc_password !== undefined ? acc_password : existing.acc_password,
+      acc_email !== undefined ? acc_email : existing.acc_email,
       req.params.id
     );
 

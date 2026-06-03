@@ -68,7 +68,11 @@ module.exports = function(db) {
   // GET /api/orders - Get user's orders
   router.get('/', authenticateToken, (req, res) => {
     const orders = db.prepare(`
-      SELECT o.*, a.title as account_title, a.rank_tier, a.price as account_price
+      SELECT o.*,
+        a.title as account_title, a.rank_tier, a.price as account_price,
+        CASE WHEN o.status = 'completed' THEN a.acc_username ELSE NULL END as acc_username,
+        CASE WHEN o.status = 'completed' THEN a.acc_password ELSE NULL END as acc_password,
+        CASE WHEN o.status = 'completed' THEN a.acc_email ELSE NULL END as acc_email
       FROM orders o
       JOIN accounts a ON o.account_id = a.id
       WHERE o.user_id = ?

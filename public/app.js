@@ -90,6 +90,7 @@ async function updateNavbar() {
           👤 ${user.username} ▼
         </button>
         <div class="dropdown-menu" id="dropdownMenu">
+          <a href="/orders.html">📦 Đơn Hàng Của Tôi</a>
           ${user.role === 'admin' ? '<a href="/admin.html">⚙️ Admin Panel</a>' : ''}
           <div class="dropdown-divider"></div>
           <button onclick="logout()" class="text-red">🚪 Đăng xuất</button>

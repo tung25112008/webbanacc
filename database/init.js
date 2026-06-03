@@ -2,7 +2,9 @@ const { DatabaseSync } = require('node:sqlite');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'tft_shop.db');
+// On Render: use /data (persistent disk). Locally: use __dirname
+const DB_DIR = process.env.NODE_ENV === 'production' ? '/data' : __dirname;
+const DB_PATH = path.join(DB_DIR, 'tft_shop.db');
 
 function initDatabase() {
   const db = new DatabaseSync(DB_PATH);
@@ -52,6 +54,9 @@ function initDatabase() {
       images TEXT DEFAULT '[]',
       status TEXT DEFAULT 'available' CHECK(status IN ('available', 'sold', 'reserved')),
       is_featured INTEGER DEFAULT 0,
+      acc_username TEXT,
+      acc_password TEXT,
+      acc_email TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -78,6 +83,11 @@ function initDatabase() {
       UNIQUE(user_id, account_id)
     );
   `);
+
+  // Migrate existing DB: add credential columns if they don't exist
+  try { db.exec('ALTER TABLE accounts ADD COLUMN acc_username TEXT'); } catch(e) {}
+  try { db.exec('ALTER TABLE accounts ADD COLUMN acc_password TEXT'); } catch(e) {}
+  try { db.exec('ALTER TABLE accounts ADD COLUMN acc_email TEXT'); } catch(e) {}
 
   // Seed data if tables are empty
   const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get().count;

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đơn Hàng Của Tôi - TFT ACC SHOP</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .orders-page {
+      padding: 120px 0 80px;
+      min-height: 100vh;
+    }
+
+    .page-header {
+      margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-secondary);
+    }
+
+    /* Order Card */
+    .order-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.1);
+    }
+
+    .order-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .order-code {
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      background: rgba(0,0,0,0.3);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    .order-date {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .order-status {
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending   { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+    .status-paid      { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+    .status-completed { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .status-cancelled { background: rgba(239, 68, 68, 0.15);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+
+    .order-body {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .order-rank-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(245,158,11,0.15));
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .order-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .order-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .order-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .order-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .order-meta-item span:first-child {
+      color: var(--primary);
+    }
+
+    .order-price {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Account credentials box (only shown when completed) */
+    .credentials-box {
+      margin: 0 24px 20px;
+      padding: 20px;
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: var(--radius);
+    }
+
+    .credentials-box h4 {
+      font-size: 1rem;
+      color: var(--green);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .credentials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .credential-item {
+      background: rgba(0,0,0,0.3);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+    }
+
+    .credential-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .credential-value {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .copy-btn {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: var(--primary);
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: var(--font-family);
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary);
+      color: #000;
+    }
+
+    /* Payment info box (for pending orders) */
+    .payment-box {
+      margin: 0 24px 20px;
+      padding: 20px;
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: var(--radius);
+    }
+
+    .payment-box h4 {
+      font-size: 1rem;
+      color: var(--primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .payment-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .payment-row:last-child {
+      border-bottom: none;
+    }
+
+    .payment-row .label {
+      color: var(--text-secondary);
+    }
+
+    .payment-row .value {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .empty-icon {
+      font-size: 5rem;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .empty-state h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      font-size: 1.1rem;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 10px 24px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), #fbbf24);
+      border-color: transparent;
+      color: #000;
+      font-weight: 700;
+    }
+
+    .tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.15);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .tab-btn.active .tab-count {
+      background: rgba(0,0,0,0.2);
+    }
+  </style>
+  <script src="api.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+  <div class="bg-particles"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar scrolled" id="navbar">
+    <div class="container">
+      <a href="/" class="nav-logo">
+        <div class="logo-icon">🐧</div>
+        <span>TFT SHOP</span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Trang Chủ</a></li>
+        <li><a href="accounts.html">Danh Sách Tài Khoản</a></li>
+        <li><a href="orders.html" class="active">Đơn Hàng</a></li>
+        <li><a href="#contact">Liên Hệ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="cart.html" class="nav-cart">
+          🛒
+          <div class="cart-badge" id="cart-badge"></div>
+        </a>
+        <div id="nav-auth"></div>
+        <button class="nav-toggle" id="nav-toggle">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="orders-page">
+    <div class="container">
+
+      <div class="page-header">
+        <h1>📦 Đơn Hàng <span class="highlight">Của Tôi</span></h1>
+        <p>Theo dõi trạng thái và thông tin các đơn hàng đã đặt</p>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="tabs" id="filter-tabs">
+        <button class="tab-btn active" data-filter="all" onclick="filterOrders('all', this)">
+          Tất Cả <span class="tab-count" id="count-all">0</span>
+        </button>
+        <button class="tab-btn" data-filter="pending" onclick="filterOrders('pending', this)">
+          ⏳ Chờ Thanh Toán <span class="tab-count" id="count-pending">0</span>
+        </button>
+        <button class="tab-btn" data-filter="paid" onclick="filterOrders('paid', this)">
+          💳 Đã Thanh Toán <span class="tab-count" id="count-paid">0</span>
+        </button>
+        <button class="tab-btn" data-filter="completed" onclick="filterOrders('completed', this)">
+          ✅ Hoàn Thành <span class="tab-count" id="count-completed">0</span>
+        </button>
+        <button class="tab-btn" data-filter="cancelled" onclick="filterOrders('cancelled', this)">
+          ❌ Đã Huỷ <span class="tab-count" id="count-cancelled">0</span>
+        </button>
+      </div>
+
+      <!-- Orders List -->
+      <div id="orders-container">
+        <div class="loading-spinner"><div class="spinner"></div></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let allOrders = [];
+    let currentFilter = 'all';
+
+    const STATUS_LABELS = {
+      pending:   '⏳ Chờ Thanh Toán',
+      paid:      '💳 Đã Thanh Toán',
+      completed: '✅ Hoàn Thành',
+      cancelled: '❌ Đã Huỷ'
+    };
+
+    const RANK_ICONS = {
+      Challenger:  '🏆',
+      Grandmaster: '💎',
+      Master:      '👑',
+      Diamond:     '💠',
+      Emerald:     '🟢',
+      Platinum:    '🔵',
+      Gold:        '🥇',
+      Silver:      '🥈',
+      Bronze:      '🥉',
+      Iron:        '⚙️'
+    };
+
+    const PAYMENT_LABELS = {
+      banking: '🏦 Chuyển Khoản Ngân Hàng',
+      momo:    '💜 Ví MoMo'
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!api.getToken()) {
+        window.location.href = '/login.html';
+        return;
+      }
+      await loadOrders();
+    });
+
+    async function loadOrders() {
+      try {
+        const res = await api.get('/orders');
+        allOrders = res.orders || [];
+        updateCounts();
+        renderOrders(allOrders);
+      } catch (err) {
+        document.getElementById('orders-container').innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">⚠️</span>
+            <h3>Không thể tải đơn hàng</h3>
+            <p>${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function updateCounts() {
+      document.getElementById('count-all').textContent = allOrders.length;
+      ['pending', 'paid', 'completed', 'cancelled'].forEach(status => {
+        const count = allOrders.filter(o => o.status === status).length;
+        document.getElementById(`count-${status}`).textContent = count;
+      });
+    }
+
+    function filterOrders(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
+      renderOrders(filtered);
+    }
+
+    function renderOrders(orders) {
+      const container = document.getElementById('orders-container');
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <h3>Chưa có đơn hàng nào</h3>
+            <p>${currentFilter === 'all' ? 'Bạn chưa đặt mua tài khoản nào. Hãy khám phá shop!' : 'Không có đơn hàng nào ở trạng thái này.'}</p>
+            <a href="accounts.html" class="btn btn-primary" style="max-width: 240px; margin: 0 auto;">🎮 Khám Phá Ngay</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = orders.map(order => renderOrderCard(order)).join('');
+    }
+
+    function renderOrderCard(order) {
+      const rankIcon = RANK_ICONS[order.rank_tier] || '🎮';
+      const statusClass = `status-${order.status}`;
+      const statusLabel = STATUS_LABELS[order.status] || order.status;
+      const paymentLabel = PAYMENT_LABELS[order.payment_method] || order.payment_method;
+      const date = new Date(order.created_at).toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      // Build credentials section if completed
+      let credentialsHTML = '';
+      if (order.status === 'completed' && order.acc_username) {
+        credentialsHTML = `
+          <div class="credentials-box">
+            <h4>🔑 Thông Tin Tài Khoản (Lưu lại cẩn thận!)</h4>
+            <div class="credentials-grid">
+              <div class="credential-item">
+                <div class="credential-label">Tên đăng nhập</div>
+                <div class="credential-value">
+                  ${order.acc_username}
+                  <button class="copy-btn" onclick="copyText('${order.acc_username}')">Copy</button>
+                </div>
+              </div>
+              <div class="credential-item">
+                <div class="credential-label">Mật khẩu</div>
+                <div class="credential-value">
+                  ${order.acc_password || '••••••••'}
+                  <button class="copy-btn" onclick="copyText('${order.acc_password || ''}')">Copy</button>
+                </div>
+              </div>
+              ${order.acc_email ? `
+              <div class="credential-item">
+                <div class="credential-label">Email liên kết</div>
+                <div class="credential-value">
+                  ${order.acc_email}
+                  <button class="copy-btn" onclick="copyText('${order.acc_email}')">Copy</button>
+                </div>
+              </div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Payment reminder for pending orders
+      let paymentHTML = '';
+      if (order.status === 'pending') {
+        const bankInfo = order.payment_method === 'momo'
+          ? `<div class="payment-row"><span class="label">Ví MoMo</span><span class="value">0909123456 <button class="copy-btn" onclick="copyText('0909123456')">Copy</button></span></div>`
+          : `<div class="payment-row"><span class="label">Ngân hàng</span><span class="value">MB Bank</span></div>
+             <div class="payment-row"><span class="label">Số tài khoản</span><span class="value">0123456789 <button class="copy-btn" onclick="copyText('0123456789')">Copy</button></span></div>`;
+
+        paymentHTML = `
+          <div class="payment-box">
+            <h4>💳 Thông Tin Thanh Toán — Vui lòng chuyển khoản để hoàn tất</h4>
+            ${bankInfo}
+            <div class="payment-row">
+              <span class="label">Số tiền</span>
+              <span class="value" style="color: var(--red); font-size: 1.1rem;">
+                ${formatCurrency(order.total_price)}
+                <button class="copy-btn" onclick="copyText('${order.total_price}')">Copy</button>
+              </span>
+            </div>
+            <div class="payment-row">
+              <span class="label">Nội dung CK</span>
+              <span class="value" style="color: var(--primary);">
+                ${order.order_code}
+                <button class="copy-btn" onclick="copyText('${order.order_code}')">Copy</button>
+              </span>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="order-card">
+          <div class="order-header">
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <code class="order-code">${order.order_code}</code>
+              <span class="order-date">🕐 ${date}</span>
+              <span class="order-date">${paymentLabel}</span>
+            </div>
+            <span class="order-status ${statusClass}">${statusLabel}</span>
+          </div>
+
+          <div class="order-body">
+            <div class="order-rank-icon">${rankIcon}</div>
+            <div class="order-info">
+              <div class="order-title">${order.account_title}</div>
+              <div class="order-meta">
+                <div class="order-meta-item"><span>🏅</span> Rank: <strong>${order.rank_tier || 'N/A'}</strong></div>
+              </div>
+            </div>
+            <div class="order-price">${formatCurrency(order.total_price)}</div>
+          </div>
+
+          ${paymentHTML}
+          ${credentialsHTML}
+        </div>
+      `;
+    }
+
+    function copyText(text) {
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => showToast('Đã copy!', 'success'));
+    }
+    window.copyText = copyText;
+  </script>
+</body>
+</html>

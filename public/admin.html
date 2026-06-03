@@ -198,6 +198,31 @@
             <label>Mô tả chi tiết</label>
             <textarea name="description" class="form-textarea" rows="4"></textarea>
           </div>
+
+          <!-- Credentials Section -->
+          <div style="border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 20px; background: rgba(16,185,129,0.04); margin-top: 4px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+              <span style="font-size: 1.3rem;">🔑</span>
+              <div>
+                <div style="font-weight: 700; color: #10b981;">Thông Tin Đăng Nhập Acc Game</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">Sẽ được gửi cho người mua khi đơn hoàn thành</div>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label>Username / Tên đăng nhập *</label>
+                <input type="text" name="acc_username" class="form-input" placeholder="VD: player123" style="border-color: rgba(16,185,129,0.4);">
+              </div>
+              <div class="form-group">
+                <label>Password / Mật khẩu *</label>
+                <input type="text" name="acc_password" class="form-input" placeholder="Mật khẩu acc game" style="border-color: rgba(16,185,129,0.4);">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Email liên kết (tùy chọn)</label>
+              <input type="email" name="acc_email" class="form-input" placeholder="VD: example@gmail.com" style="border-color: rgba(16,185,129,0.4); margin-bottom: 0;">
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>

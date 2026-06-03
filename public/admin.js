@@ -59,6 +59,7 @@ async function loadAdminAccounts() {
           <div style="font-weight: 600; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${acc.title}">
             ${acc.title}
           </div>
+          ${!acc.acc_username ? '<div style="font-size:0.75rem; color: #f59e0b; margin-top:2px;">⚠️ Chưa có thông tin đăng nhập</div>' : '<div style="font-size:0.75rem; color: #10b981; margin-top:2px;">✅ Đã có thông tin đăng nhập</div>'}
         </td>
         <td><span class="detail-rank-badge rank-${acc.rank_tier.toLowerCase()}" style="padding: 2px 8px; font-size: 0.7rem;">${acc.rank_tier}</span></td>
         <td style="color: var(--gold); font-weight: 600;">${formatCurrency(acc.price)}</td>
@@ -156,9 +157,10 @@ function openAccountModal(id = null) {
 
   if (id) {
     title.textContent = 'Chỉnh sửa tài khoản';
-    // Fetch data and fill form
-    api.get(`/accounts/${id}`).then(res => {
-      const acc = res.account;
+    // Fetch data and fill form — use admin/all to get credentials
+    api.get(`/accounts/admin/all`).then(res => {
+      const acc = res.accounts.find(a => a.id === id);
+      if (!acc) { showToast('Không tìm thấy tài khoản', 'error'); closeModal(); return; }
       form.title.value = acc.title;
       form.price.value = acc.price;
       form.original_price.value = acc.original_price || '';
@@ -171,6 +173,9 @@ function openAccountModal(id = null) {
       form.status.value = acc.status;
       form.is_featured.value = acc.is_featured;
       form.description.value = acc.description;
+      form.acc_username.value = acc.acc_username || '';
+      form.acc_password.value = acc.acc_password || '';
+      form.acc_email.value = acc.acc_email || '';
     }).catch(err => {
       showToast(err.message, 'error');
       closeModal();
@@ -204,7 +209,10 @@ document.getElementById('accountForm')?.addEventListener('submit', async (e) => 
     status: form.status.value,
     is_featured: parseInt(form.is_featured.value),
     description: form.description.value,
-    images: '[]' // Mock empty array for now
+    acc_username: form.acc_username.value.trim() || null,
+    acc_password: form.acc_password.value.trim() || null,
+    acc_email: form.acc_email.value.trim() || null,
+    images: '[]'
   };
 
   try {
