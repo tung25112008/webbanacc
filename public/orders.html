@@ -488,39 +488,65 @@
         hour: '2-digit', minute: '2-digit'
       });
 
-      // Build credentials section if completed
+      // Build credentials section based on status
       let credentialsHTML = '';
-      if (order.status === 'completed' && order.acc_username) {
+      if (order.status === 'completed') {
+        if (order.acc_username) {
+          // ✅ Has credentials — show them
+          credentialsHTML = `
+            <div class="credentials-box">
+              <h4>🔑 Thông Tin Tài Khoản (Lưu lại cẩn thận!)</h4>
+              <div class="credentials-grid">
+                <div class="credential-item">
+                  <div class="credential-label">Tên đăng nhập</div>
+                  <div class="credential-value">
+                    ${order.acc_username}
+                    <button class="copy-btn" onclick="copyText('${order.acc_username}')">Copy</button>
+                  </div>
+                </div>
+                <div class="credential-item">
+                  <div class="credential-label">Mật khẩu</div>
+                  <div class="credential-value">
+                    ${order.acc_password || '••••••••'}
+                    <button class="copy-btn" onclick="copyText('${order.acc_password || ''}')">Copy</button>
+                  </div>
+                </div>
+                ${order.acc_email ? `
+                <div class="credential-item">
+                  <div class="credential-label">Email liên kết</div>
+                  <div class="credential-value">
+                    ${order.acc_email}
+                    <button class="copy-btn" onclick="copyText('${order.acc_email}')">Copy</button>
+                  </div>
+                </div>` : ''}
+              </div>
+            </div>
+          `;
+        } else {
+          // ⚠️ Completed but no credentials entered yet by admin
+          credentialsHTML = `
+            <div style="margin: 0 24px 20px; padding: 20px; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; display: flex; align-items: center; gap: 16px;">
+              <span style="font-size: 2rem;">⏳</span>
+              <div>
+                <div style="font-weight: 700; color: #f59e0b; margin-bottom: 4px;">Shop đang xử lý thông tin tài khoản</div>
+                <div style="color: var(--text-secondary); font-size: 0.95rem;">Vui lòng liên hệ shop qua Zalo/Hotline để nhận thông tin đăng nhập nhanh hơn.</div>
+              </div>
+            </div>
+          `;
+        }
+      } else if (order.status === 'paid') {
+        // 💳 Paid — waiting for admin to confirm
         credentialsHTML = `
-          <div class="credentials-box">
-            <h4>🔑 Thông Tin Tài Khoản (Lưu lại cẩn thận!)</h4>
-            <div class="credentials-grid">
-              <div class="credential-item">
-                <div class="credential-label">Tên đăng nhập</div>
-                <div class="credential-value">
-                  ${order.acc_username}
-                  <button class="copy-btn" onclick="copyText('${order.acc_username}')">Copy</button>
-                </div>
-              </div>
-              <div class="credential-item">
-                <div class="credential-label">Mật khẩu</div>
-                <div class="credential-value">
-                  ${order.acc_password || '••••••••'}
-                  <button class="copy-btn" onclick="copyText('${order.acc_password || ''}')">Copy</button>
-                </div>
-              </div>
-              ${order.acc_email ? `
-              <div class="credential-item">
-                <div class="credential-label">Email liên kết</div>
-                <div class="credential-value">
-                  ${order.acc_email}
-                  <button class="copy-btn" onclick="copyText('${order.acc_email}')">Copy</button>
-                </div>
-              </div>` : ''}
+          <div style="margin: 0 24px 20px; padding: 20px; background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; display: flex; align-items: center; gap: 16px;">
+            <span style="font-size: 2rem;">🔍</span>
+            <div>
+              <div style="font-weight: 700; color: #818cf8; margin-bottom: 4px;">Đang xác nhận thanh toán</div>
+              <div style="color: var(--text-secondary); font-size: 0.95rem;">Shop đã nhận được thanh toán và đang xử lý. Thông tin tài khoản sẽ xuất hiện tại đây sau khi xác nhận xong.</div>
             </div>
           </div>
         `;
       }
+
 
       // Payment reminder for pending orders
       let paymentHTML = '';
