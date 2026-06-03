@@ -90,6 +90,20 @@ function initDatabase() {
   try { db.exec('ALTER TABLE accounts ADD COLUMN acc_password TEXT'); } catch(e) {}
   try { db.exec('ALTER TABLE accounts ADD COLUMN acc_email TEXT'); } catch(e) {}
 
+  // Update existing admin credentials if provided in ENV
+  if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
+    try {
+      const adminHashed = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10);
+      const adminUser = db.prepare('SELECT id FROM users WHERE role = "admin" LIMIT 1').get();
+      if (adminUser) {
+        db.prepare('UPDATE users SET username = ?, password = ? WHERE id = ?')
+          .run(process.env.ADMIN_USERNAME, adminHashed, adminUser.id);
+      }
+    } catch (e) {
+      console.error('Failed to update admin credentials from ENV:', e);
+    }
+  }
+
   // Seed data if tables are empty
   const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
   if (userCount === 0) {
@@ -101,11 +115,13 @@ function initDatabase() {
 
 function seedData(db) {
   // Create admin and test user
-  const adminPass = bcrypt.hashSync('admin123', 10);
+  const adminUser = process.env.ADMIN_USERNAME || 'admin';
+  const adminPassStr = process.env.ADMIN_PASSWORD || 'admin123';
+  const adminPass = bcrypt.hashSync(adminPassStr, 10);
   const userPass = bcrypt.hashSync('user123', 10);
 
   const insertUser = db.prepare('INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)');
-  insertUser.run('admin', 'admin@tftshop.vn', adminPass, 'admin');
+  insertUser.run(adminUser, 'admin@tftshop.vn', adminPass, 'admin');
   insertUser.run('user1', 'user1@gmail.com', userPass, 'user');
 
   // Seed TFT accounts
