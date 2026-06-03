@@ -144,15 +144,15 @@
         </div>
 
         <div class="contact-form">
-          <form onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã liên hệ! Lời nhắn đã được gửi đi.');">
+          <form id="contactForm" onsubmit="submitContactForm(event)">
             <div class="form-group">
-              <input type="text" class="form-input" placeholder="Họ và tên của bạn" required>
+              <input type="text" name="name" class="form-input" placeholder="Họ và tên của bạn" required>
             </div>
             <div class="form-group">
-              <input type="email" class="form-input" placeholder="Email liên hệ" required>
+              <input type="email" name="email" class="form-input" placeholder="Email liên hệ" required>
             </div>
             <div class="form-group">
-              <textarea class="form-input" rows="4" placeholder="Nội dung lời nhắn..." required
+              <textarea name="message" class="form-input" rows="4" placeholder="Nội dung lời nhắn..." required
                 style="resize: vertical;"></textarea>
             </div>
             <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Gửi Tin Nhắn</button>
@@ -161,6 +161,47 @@
       </div>
     </div>
   </section>
+
+  <script>
+    async function submitContactForm(event) {
+      event.preventDefault();
+      const form = event.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      
+      // THAY ID CỦA BẠN VÀO ĐÂY (vd: mvgq... )
+      const FORMSPREE_ID = "YOUR_FORMSPREE_ID"; 
+
+      if (FORMSPREE_ID === "YOUR_FORMSPREE_ID") {
+        alert("Admin chưa cấu hình ID Formspree! Vui lòng làm theo hướng dẫn để nhận email.");
+        return;
+      }
+
+      btn.textContent = 'Đang gửi...';
+      btn.disabled = true;
+
+      const data = new FormData(form);
+      try {
+        const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+          method: "POST",
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (response.ok) {
+          alert("✅ Cảm ơn bạn! Lời nhắn đã được gửi thành công.");
+          form.reset();
+        } else {
+          alert("❌ Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+        }
+      } catch (error) {
+        alert("❌ Lỗi kết nối. Vui lòng kiểm tra mạng.");
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+  </script>
 
   <!-- Footer -->
   <footer class="footer">
