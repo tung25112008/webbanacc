@@ -58,14 +58,17 @@ function initDatabase() {
       acc_username TEXT,
       acc_password TEXT,
       acc_email TEXT,
+      type TEXT DEFAULT 'unique' CHECK(type IN ('unique', 'bulk')),
+      stock INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_code TEXT UNIQUE NOT NULL,
+      order_code TEXT NOT NULL,
       user_id INTEGER NOT NULL,
       account_id INTEGER NOT NULL,
+      quantity INTEGER DEFAULT 1,
       total_price INTEGER NOT NULL,
       payment_method TEXT DEFAULT 'banking',
       status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'paid', 'completed', 'cancelled')),
@@ -78,10 +81,23 @@ function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       account_id INTEGER NOT NULL,
+      quantity INTEGER DEFAULT 1,
       added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (account_id) REFERENCES accounts(id),
       UNIQUE(user_id, account_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS account_credentials (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      account_id INTEGER NOT NULL,
+      username TEXT NOT NULL,
+      password TEXT NOT NULL,
+      email TEXT,
+      status TEXT DEFAULT 'available' CHECK(status IN ('available', 'sold')),
+      order_id INTEGER,
+      FOREIGN KEY (account_id) REFERENCES accounts(id),
+      FOREIGN KEY (order_id) REFERENCES orders(id)
     );
   `);
 
@@ -89,6 +105,38 @@ function initDatabase() {
   try { db.exec('ALTER TABLE accounts ADD COLUMN acc_username TEXT'); } catch(e) {}
   try { db.exec('ALTER TABLE accounts ADD COLUMN acc_password TEXT'); } catch(e) {}
   try { db.exec('ALTER TABLE accounts ADD COLUMN acc_email TEXT'); } catch(e) {}
+  try { db.exec("ALTER TABLE accounts ADD COLUMN type TEXT DEFAULT 'unique' CHECK(type IN ('unique', 'bulk'))"); } catch(e) {}
+  try { db.exec('ALTER TABLE accounts ADD COLUMN stock INTEGER DEFAULT 1'); } catch(e) {}
+  try { db.exec('ALTER TABLE cart_items ADD COLUMN quantity INTEGER DEFAULT 1'); } catch(e) {}
+
+  // Migrate orders table to remove UNIQUE constraint on order_code and add quantity
+  try {
+    // Check if order_code is unique (sqlite_master)
+    const tableInfo = db.prepare("PRAGMA table_info(orders)").all();
+    const hasQuantity = tableInfo.some(col => col.name === 'quantity');
+    if (!hasQuantity) {
+      db.exec('PRAGMA foreign_keys=off;');
+      db.exec('BEGIN TRANSACTION;');
+      db.exec('ALTER TABLE orders RENAME TO _orders_old;');
+      db.exec(`CREATE TABLE orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_code TEXT NOT NULL,
+        user_id INTEGER NOT NULL,
+        account_id INTEGER NOT NULL,
+        quantity INTEGER DEFAULT 1,
+        total_price INTEGER NOT NULL,
+        payment_method TEXT DEFAULT 'banking',
+        status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'paid', 'completed', 'cancelled')),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (account_id) REFERENCES accounts(id)
+      )`);
+      db.exec('INSERT INTO orders (id, order_code, user_id, account_id, total_price, payment_method, status, created_at) SELECT id, order_code, user_id, account_id, total_price, payment_method, status, created_at FROM _orders_old;');
+      db.exec('DROP TABLE _orders_old;');
+      db.exec('COMMIT;');
+      db.exec('PRAGMA foreign_keys=on;');
+    }
+  } catch(e) { console.error('Migration failed:', e); }
 
   // Update existing admin credentials if provided in ENV
   if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {

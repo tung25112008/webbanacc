@@ -147,6 +147,13 @@
               </select>
             </div>
             <div class="form-group">
+              <label>Loại Sản Phẩm *</label>
+              <select name="type" class="form-select" onchange="toggleCredentialFields()" required>
+                <option value="unique">Tài khoản đơn (Rank Cao)</option>
+                <option value="bulk">Tài khoản sỉ (Smurf, Reroll...)</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>Server *</label>
               <select name="server" class="form-select" required>
                 <option value="VN">Việt Nam (VN)</option>
@@ -208,19 +215,33 @@
                 <div style="font-size: 0.85rem; color: var(--text-secondary);">Sẽ được gửi cho người mua khi đơn hoàn thành</div>
               </div>
             </div>
-            <div class="d-grid grid-cols-2 gap-4">
-              <div class="form-group">
-                <label>Username / Tên đăng nhập *</label>
-                <input type="text" name="acc_username" class="form-input input-green" placeholder="VD: player123">
+
+            <!-- Unique Acc Fields -->
+            <div id="unique-cred-fields">
+              <div class="d-grid grid-cols-2 gap-4">
+                <div class="form-group">
+                  <label>Username / Tên đăng nhập *</label>
+                  <input type="text" name="acc_username" class="form-input input-green" placeholder="VD: player123">
+                </div>
+                <div class="form-group">
+                  <label>Password / Mật khẩu *</label>
+                  <input type="text" name="acc_password" class="form-input input-green" placeholder="Mật khẩu acc game">
+                </div>
               </div>
-              <div class="form-group">
-                <label>Password / Mật khẩu *</label>
-                <input type="text" name="acc_password" class="form-input input-green" placeholder="Mật khẩu acc game">
+              <div class="form-group mb-0">
+                <label>Email liên kết (tùy chọn)</label>
+                <input type="email" name="acc_email" class="form-input input-green" placeholder="VD: example@gmail.com">
               </div>
             </div>
-            <div class="form-group mb-0">
-              <label>Email liên kết (tùy chọn)</label>
-              <input type="email" name="acc_email" class="form-input input-green" placeholder="VD: example@gmail.com">
+
+            <!-- Bulk Acc Fields -->
+            <div id="bulk-cred-fields" class="d-none">
+              <div class="form-group mb-0">
+                <label>Dán danh sách tài khoản sỉ (Mỗi dòng 1 acc)</label>
+                <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 8px;">Định dạng: <code>username|password</code> hoặc <code>username|password|email</code></div>
+                <textarea name="bulk_credentials" class="form-textarea input-green" rows="6" placeholder="user1|pass1\nuser2|pass2|mail2@gmail.com"></textarea>
+                <div id="bulk-stock-info" style="font-size: 0.8rem; color: var(--gold); margin-top: 5px;"></div>
+              </div>
             </div>
           </div>
         </div>

@@ -43,9 +43,23 @@ async function loadAccountDetails(id) {
       `;
     }
 
-    let statusBtn = `<button class="btn btn-primary" onclick="addToCart(${acc.id})">🛒 Thêm vào giỏ</button>`;
-    if (acc.status !== 'available') {
-      statusBtn = `<button class="btn btn-secondary" disabled>Đã Bán</button>`;
+    let statusBtn = '';
+    let quantitySelector = '';
+
+    if (acc.status === 'available' && acc.stock > 0) {
+      if (acc.type === 'bulk') {
+        quantitySelector = `
+          <div class="quantity-selector" style="margin-right: 15px; display: flex; align-items: center; gap: 10px;">
+            <label for="bulk-qty">Số lượng (Kho: ${acc.stock}):</label>
+            <input type="number" id="bulk-qty" value="1" min="1" max="${acc.stock}" style="width: 60px; padding: 5px; border-radius: 4px; border: 1px solid var(--border);">
+          </div>
+        `;
+        statusBtn = `<button class="btn btn-primary" onclick="addBulkToCart(${acc.id})">🛒 Thêm vào giỏ</button>`;
+      } else {
+        statusBtn = `<button class="btn btn-primary" onclick="addToCart(${acc.id})">🛒 Thêm vào giỏ</button>`;
+      }
+    } else {
+      statusBtn = `<button class="btn btn-secondary" disabled>Đã Bán / Hết Hàng</button>`;
     }
 
     container.innerHTML = `
@@ -110,7 +124,8 @@ async function loadAccountDetails(id) {
             <div class="detail-price">
               ${priceHTML}
             </div>
-            <div class="detail-actions">
+            <div class="detail-actions" style="display: flex; align-items: center;">
+              ${quantitySelector}
               ${statusBtn}
             </div>
           </div>
@@ -128,4 +143,10 @@ async function loadAccountDetails(id) {
       </div>
     `;
   }
+}
+
+async function addBulkToCart(accountId) {
+  const qtyInput = document.getElementById('bulk-qty');
+  const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+  await addToCart(accountId, quantity);
 }

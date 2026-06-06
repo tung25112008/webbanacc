@@ -179,37 +179,65 @@
       // Build credentials section based on status
       let credentialsHTML = '';
       if (order.status === 'completed') {
-        if (order.acc_username) {
-          // ✅ Has credentials — show them
-          credentialsHTML = `
-            <div class="credentials-box">
-              <h4>🔑 Thông Tin Tài Khoản (Lưu lại cẩn thận!)</h4>
-              <div class="credentials-grid">
-                <div class="credential-item">
-                  <div class="credential-label">Tên đăng nhập</div>
-                  <div class="credential-value">
-                    ${order.acc_username}
-                    <button class="copy-btn" onclick="copyText('${order.acc_username}')">Copy</button>
-                  </div>
-                </div>
-                <div class="credential-item">
-                  <div class="credential-label">Mật khẩu</div>
-                  <div class="credential-value">
-                    ${order.acc_password || '••••••••'}
-                    <button class="copy-btn" onclick="copyText('${order.acc_password || ''}')">Copy</button>
-                  </div>
-                </div>
-                ${order.acc_email ? `
-                <div class="credential-item">
-                  <div class="credential-label">Email liên kết</div>
-                  <div class="credential-value">
-                    ${order.acc_email}
-                    <button class="copy-btn" onclick="copyText('${order.acc_email}')">Copy</button>
-                  </div>
-                </div>` : ''}
+        const isBulkWithCreds = order.account_type === 'bulk' && order.bulk_credentials && order.bulk_credentials.length > 0;
+        if (order.acc_username || isBulkWithCreds) {
+          if (isBulkWithCreds) {
+            // 📦 Bulk credentials
+            const credsList = order.bulk_credentials.map((c, idx) => `
+              <div style="display: flex; gap: 10px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+                <span style="color: var(--text-light); width: 24px;">#${idx+1}</span>
+                <span style="flex: 1;">${c.username}</span>
+                <span style="flex: 1; color: var(--gold);">${c.password}</span>
+                ${c.email ? `<span style="flex: 1; color: var(--text-secondary);">${c.email}</span>` : ''}
               </div>
-            </div>
-          `;
+            `).join('');
+
+            const txtContent = order.bulk_credentials.map(c => \`\${c.username}|\${c.password}\${c.email ? '|' + c.email : ''}\`).join('\\n');
+            const encodedTxt = encodeURIComponent(txtContent);
+
+            credentialsHTML = `
+              <div class="credentials-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <h4 style="margin: 0;">📦 Danh Sách Tài Khoản (${order.bulk_credentials.length} acc)</h4>
+                  <a href="data:text/plain;charset=utf-8,${encodedTxt}" download="TFT_ACCOUNTS_${order.order_code}.txt" class="btn btn-secondary btn-sm" style="background: var(--surface); color: var(--text);">⬇️ Tải file .txt</a>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.9rem;">
+                  ${credsList}
+                </div>
+              </div>
+            `;
+          } else {
+            // ✅ Unique credentials
+            credentialsHTML = `
+              <div class="credentials-box">
+                <h4>🔑 Thông Tin Tài Khoản (Lưu lại cẩn thận!)</h4>
+                <div class="credentials-grid">
+                  <div class="credential-item">
+                    <div class="credential-label">Tên đăng nhập</div>
+                    <div class="credential-value">
+                      ${order.acc_username}
+                      <button class="copy-btn" onclick="copyText('${order.acc_username}')">Copy</button>
+                    </div>
+                  </div>
+                  <div class="credential-item">
+                    <div class="credential-label">Mật khẩu</div>
+                    <div class="credential-value">
+                      ${order.acc_password || '••••••••'}
+                      <button class="copy-btn" onclick="copyText('${order.acc_password || ''}')">Copy</button>
+                    </div>
+                  </div>
+                  ${order.acc_email ? `
+                  <div class="credential-item">
+                    <div class="credential-label">Email liên kết</div>
+                    <div class="credential-value">
+                      ${order.acc_email}
+                      <button class="copy-btn" onclick="copyText('${order.acc_email}')">Copy</button>
+                    </div>
+                  </div>` : ''}
+                </div>
+              </div>
+            `;
+          }
         } else {
           // ⚠️ Completed but no credentials entered yet by admin
           credentialsHTML = `
@@ -280,7 +308,7 @@
           <div class="order-body">
             <div class="order-rank-icon">${rankIcon}</div>
             <div class="order-info">
-              <div class="order-title">${order.account_title}</div>
+              <div class="order-title">${order.account_title} ${order.quantity > 1 ? `<span style="color:var(--gold)">x${order.quantity}</span>` : ''}</div>
               <div class="order-meta">
                 <div class="order-meta-item"><span>🏅</span> Rank: <strong>${order.rank_tier || 'N/A'}</strong></div>
               </div>

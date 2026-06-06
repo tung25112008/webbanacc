@@ -16,32 +16,56 @@ module.exports = function(db) {
 
     const createOrders = db.transaction(() => {
       const orders = [];
+      const orderCode = 'TFT' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
 
       for (const accountId of account_ids) {
-        // Check account is available
-        const account = db.prepare("SELECT * FROM accounts WHERE id = ? AND status = 'available'").get(accountId);
+        // Get cart item quantity
+        const cartItem = db.prepare('SELECT quantity FROM cart_items WHERE user_id = ? AND account_id = ?').get(req.user.id, accountId);
+        if (!cartItem) continue;
+        const reqQty = cartItem.quantity || 1;
+
+        // Check account is available and has enough stock
+        const account = db.prepare("SELECT * FROM accounts WHERE id = ? AND status = 'available' AND stock >= ?").get(accountId, reqQty);
         if (!account) continue;
 
-        // Generate order code
-        const orderCode = 'TFT' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
+        const totalPrice = account.price * reqQty;
 
         // Create order
         const result = db.prepare(`
-          INSERT INTO orders (order_code, user_id, account_id, total_price, payment_method, status)
-          VALUES (?, ?, ?, ?, ?, 'pending')
-        `).run(orderCode, req.user.id, accountId, account.price, method);
+          INSERT INTO orders (order_code, user_id, account_id, quantity, total_price, payment_method, status)
+          VALUES (?, ?, ?, ?, ?, ?, 'pending')
+        `).run(orderCode, req.user.id, accountId, reqQty, totalPrice, method);
+        
+        const orderId = Number(result.lastInsertRowid);
 
-        // Mark account as reserved
-        db.prepare("UPDATE accounts SET status = 'reserved' WHERE id = ?").run(accountId);
+        if (account.type === 'bulk') {
+          // Allocate credentials
+          const creds = db.prepare("SELECT id FROM account_credentials WHERE account_id = ? AND status = 'available' LIMIT ?").all(accountId, reqQty);
+          if (creds.length === reqQty) {
+            const credIds = creds.map(c => c.id);
+            db.prepare(`UPDATE account_credentials SET status = 'sold', order_id = ? WHERE id IN (${credIds.join(',')})`).run(orderId);
+            
+            // Update stock
+            db.prepare(`UPDATE accounts SET stock = stock - ? WHERE id = ?`).run(reqQty, accountId);
+            const newStock = account.stock - reqQty;
+            if (newStock <= 0) {
+              db.prepare("UPDATE accounts SET status = 'sold' WHERE id = ?").run(accountId);
+            }
+          }
+        } else {
+          // Unique account
+          db.prepare("UPDATE accounts SET status = 'sold', stock = 0 WHERE id = ?").run(accountId);
+        }
 
         // Remove from cart
         db.prepare('DELETE FROM cart_items WHERE user_id = ? AND account_id = ?').run(req.user.id, accountId);
 
         orders.push({
-          id: Number(result.lastInsertRowid),
+          id: orderId,
           order_code: orderCode,
           account_title: account.title,
-          total_price: account.price,
+          quantity: reqQty,
+          total_price: totalPrice,
           payment_method: method
         });
       }
@@ -52,7 +76,7 @@ module.exports = function(db) {
     const orders = createOrders();
 
     if (orders.length === 0) {
-      return res.status(400).json({ error: 'Không có tài khoản nào khả dụng' });
+      return res.status(400).json({ error: 'Không có tài khoản nào khả dụng hoặc không đủ tồn kho' });
     }
 
     const totalAmount = orders.reduce((sum, o) => sum + o.total_price, 0);
@@ -67,9 +91,9 @@ module.exports = function(db) {
 
   // GET /api/orders - Get user's orders
   router.get('/', authenticateToken, (req, res) => {
-    const orders = db.prepare(`
+    const rawOrders = db.prepare(`
       SELECT o.*,
-        a.title as account_title, a.rank_tier, a.price as account_price,
+        a.title as account_title, a.rank_tier, a.price as account_price, a.type as account_type,
         CASE WHEN o.status = 'completed' THEN a.acc_username ELSE NULL END as acc_username,
         CASE WHEN o.status = 'completed' THEN a.acc_password ELSE NULL END as acc_password,
         CASE WHEN o.status = 'completed' THEN a.acc_email ELSE NULL END as acc_email
@@ -78,6 +102,14 @@ module.exports = function(db) {
       WHERE o.user_id = ?
       ORDER BY o.created_at DESC
     `).all(req.user.id);
+
+    const orders = rawOrders.map(o => {
+      if (o.account_type === 'bulk' && o.status === 'completed') {
+        const creds = db.prepare('SELECT username, password, email FROM account_credentials WHERE order_id = ?').all(o.id);
+        o.bulk_credentials = creds;
+      }
+      return o;
+    });
 
     res.json({ orders });
   });

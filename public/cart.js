@@ -38,6 +38,19 @@ async function loadCart() {
         }
       } catch(e) {}
 
+      let quantityHTML = '';
+      if (item.type === 'bulk') {
+        quantityHTML = `
+          <div class="cart-item-quantity" style="margin-top: 8px;">
+            <label style="font-size: 0.9rem;">Số lượng:</label>
+            <input type="number" value="${item.cart_quantity}" min="1" max="${item.stock}" 
+                   onchange="updateCartQuantity(${item.account_id}, this.value)"
+                   style="width: 50px; padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border);">
+            <span style="font-size: 0.8rem; color: var(--text-light); margin-left: 5px;">(Kho: ${item.stock})</span>
+          </div>
+        `;
+      }
+
       return `
         <div class="cart-item" id="cart-item-${item.id}">
           ${imageHTML}
@@ -45,6 +58,7 @@ async function loadCart() {
             <div class="cart-item-rank">${item.rank_tier} • SV: ${item.server}</div>
             <a href="/account-detail.html?id=${item.id}" class="cart-item-title">${item.title}</a>
             <div class="cart-item-price">${formatCurrency(item.price)}</div>
+            ${quantityHTML}
           </div>
           <button class="cart-item-remove" onclick="removeFromCart(${item.id})" title="Xóa">🗑️</button>
         </div>
@@ -69,6 +83,16 @@ async function removeFromCart(id) {
     loadCart(); // Reload whole cart to recalculate totals safely
   } catch (err) {
     showToast(err.message, 'error');
+  }
+}
+
+async function updateCartQuantity(accountId, quantity) {
+  try {
+    const res = await api.put(`/cart/${accountId}`, { quantity });
+    loadCart();
+  } catch (err) {
+    showToast(err.message, 'error');
+    loadCart(); // Reload to revert invalid value
   }
 }
 

@@ -149,9 +149,9 @@ function startVerificationSimulation() {
   // Fake verification success after 10-15s
   setTimeout(() => {
     clearInterval(interval);
-    statusEl.innerHTML = '<span style="color: var(--green);">✅ Thanh toán thành công!</span><br>Tài khoản đã được gửi vào email của bạn.';
+    statusEl.innerHTML = '<span style="color: var(--green);">✅ Thanh toán thành công!</span><br>Tài khoản đã được chuyển vào Lịch sử đơn hàng.';
     setTimeout(() => {
-      window.location.href = '/';
-    }, 4000);
+      window.location.href = '/orders.html';
+    }, 3000);
   }, 12000);
 }

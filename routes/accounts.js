@@ -114,61 +114,117 @@ module.exports = function(db) {
 
   // POST /api/accounts - Create (admin only)
   router.post('/', authenticateToken, requireAdmin, (req, res) => {
-    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured, acc_username, acc_password, acc_email } = req.body;
+    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured, acc_username, acc_password, acc_email, type, bulk_credentials } = req.body;
 
     if (!title || !price || !rank_tier) {
       return res.status(400).json({ error: 'Vui lòng điền tên, giá và rank' });
     }
 
-    const result = db.prepare(`
-      INSERT INTO accounts (title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured, acc_username, acc_password, acc_email)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      title, description || '', parseInt(price), original_price ? parseInt(original_price) : null,
-      rank_tier, parseInt(level) || 1, parseInt(little_legends) || 0, parseInt(arenas) || 0,
-      parseInt(tacticians) || 0, server || 'VN', images || '[]', is_featured ? 1 : 0,
-      acc_username || null, acc_password || null, acc_email || null
-    );
+    const accType = type || 'unique';
+    let stock = 1;
+    let parsedCredentials = [];
 
-    const account = db.prepare('SELECT * FROM accounts WHERE id = ?').get(Number(result.lastInsertRowid));
+    if (accType === 'bulk' && bulk_credentials) {
+      const lines = bulk_credentials.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      for (const line of lines) {
+        const parts = line.split('|');
+        if (parts.length >= 2) {
+          parsedCredentials.push({
+            username: parts[0].trim(),
+            password: parts[1].trim(),
+            email: parts[2] ? parts[2].trim() : null
+          });
+        }
+      }
+      stock = parsedCredentials.length;
+      if (stock === 0) {
+        return res.status(400).json({ error: 'Không có tài khoản sỉ nào hợp lệ. Định dạng: username|password' });
+      }
+    }
+
+    const result = db.transaction(() => {
+      const info = db.prepare(`
+        INSERT INTO accounts (title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, is_featured, acc_username, acc_password, acc_email, type, stock)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        title, description || '', parseInt(price), original_price ? parseInt(original_price) : null,
+        rank_tier, parseInt(level) || 1, parseInt(little_legends) || 0, parseInt(arenas) || 0,
+        parseInt(tacticians) || 0, server || 'VN', images || '[]', is_featured ? 1 : 0,
+        accType === 'unique' ? (acc_username || null) : null, 
+        accType === 'unique' ? (acc_password || null) : null, 
+        accType === 'unique' ? (acc_email || null) : null,
+        accType, stock
+      );
+
+      const newId = Number(info.lastInsertRowid);
+
+      if (accType === 'bulk') {
+        const insertCred = db.prepare('INSERT INTO account_credentials (account_id, username, password, email) VALUES (?, ?, ?, ?)');
+        for (const cred of parsedCredentials) {
+          insertCred.run(newId, cred.username, cred.password, cred.email);
+        }
+      }
+
+      return newId;
+    })();
+
+    const account = db.prepare('SELECT * FROM accounts WHERE id = ?').get(result);
     res.json({ message: 'Thêm tài khoản thành công!', account });
   });
 
   // PUT /api/accounts/:id - Update (admin only)
   router.put('/:id', authenticateToken, requireAdmin, (req, res) => {
-    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, status, is_featured, acc_username, acc_password, acc_email } = req.body;
+    const { title, description, price, original_price, rank_tier, level, little_legends, arenas, tacticians, server, images, status, is_featured, acc_username, acc_password, acc_email, bulk_credentials } = req.body;
 
     const existing = db.prepare('SELECT * FROM accounts WHERE id = ?').get(req.params.id);
     if (!existing) {
       return res.status(404).json({ error: 'Không tìm thấy tài khoản' });
     }
 
-    db.prepare(`
-      UPDATE accounts SET
-        title = ?, description = ?, price = ?, original_price = ?, rank_tier = ?,
-        level = ?, little_legends = ?, arenas = ?, tacticians = ?,
-        server = ?, images = ?, status = ?, is_featured = ?,
-        acc_username = ?, acc_password = ?, acc_email = ?
-      WHERE id = ?
-    `).run(
-      title || existing.title,
-      description !== undefined ? description : existing.description,
-      price ? parseInt(price) : existing.price,
-      original_price !== undefined ? (original_price ? parseInt(original_price) : null) : existing.original_price,
-      rank_tier || existing.rank_tier,
-      level ? parseInt(level) : existing.level,
-      little_legends !== undefined ? parseInt(little_legends) : existing.little_legends,
-      arenas !== undefined ? parseInt(arenas) : existing.arenas,
-      tacticians !== undefined ? parseInt(tacticians) : existing.tacticians,
-      server || existing.server,
-      images || existing.images,
-      status || existing.status,
-      is_featured !== undefined ? (is_featured ? 1 : 0) : existing.is_featured,
-      acc_username !== undefined ? acc_username : existing.acc_username,
-      acc_password !== undefined ? acc_password : existing.acc_password,
-      acc_email !== undefined ? acc_email : existing.acc_email,
-      req.params.id
-    );
+    db.transaction(() => {
+      db.prepare(`
+        UPDATE accounts SET
+          title = ?, description = ?, price = ?, original_price = ?, rank_tier = ?,
+          level = ?, little_legends = ?, arenas = ?, tacticians = ?,
+          server = ?, images = ?, status = ?, is_featured = ?,
+          acc_username = ?, acc_password = ?, acc_email = ?
+        WHERE id = ?
+      `).run(
+        title || existing.title,
+        description !== undefined ? description : existing.description,
+        price ? parseInt(price) : existing.price,
+        original_price !== undefined ? (original_price ? parseInt(original_price) : null) : existing.original_price,
+        rank_tier || existing.rank_tier,
+        level ? parseInt(level) : existing.level,
+        little_legends !== undefined ? parseInt(little_legends) : existing.little_legends,
+        arenas !== undefined ? parseInt(arenas) : existing.arenas,
+        tacticians !== undefined ? parseInt(tacticians) : existing.tacticians,
+        server || existing.server,
+        images || existing.images,
+        status || existing.status,
+        is_featured !== undefined ? (is_featured ? 1 : 0) : existing.is_featured,
+        acc_username !== undefined ? acc_username : existing.acc_username,
+        acc_password !== undefined ? acc_password : existing.acc_password,
+        acc_email !== undefined ? acc_email : existing.acc_email,
+        req.params.id
+      );
+
+      if (existing.type === 'bulk' && bulk_credentials) {
+        const lines = bulk_credentials.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let added = 0;
+        const insertCred = db.prepare('INSERT INTO account_credentials (account_id, username, password, email) VALUES (?, ?, ?, ?)');
+        for (const line of lines) {
+          const parts = line.split('|');
+          if (parts.length >= 2) {
+            insertCred.run(req.params.id, parts[0].trim(), parts[1].trim(), parts[2] ? parts[2].trim() : null);
+            added++;
+          }
+        }
+        if (added > 0) {
+          db.prepare("UPDATE accounts SET stock = stock + ?, status = 'available' WHERE id = ?").run(added, req.params.id);
+        }
+      }
+    })();
 
     const updated = db.prepare('SELECT * FROM accounts WHERE id = ?').get(req.params.id);
     res.json({ message: 'Cập nhật thành công!', account: updated });

@@ -221,7 +221,7 @@ function createAccountCardHTML(acc) {
 window.createAccountCardHTML = createAccountCardHTML;
 
 // Global add to cart func
-async function addToCart(accountId) {
+async function addToCart(accountId, quantity = 1) {
   if (!api.getToken()) {
     showToast('Vui lòng đăng nhập để thêm vào giỏ hàng', 'error');
     setTimeout(() => { window.location.href = '/login.html'; }, 1500);
@@ -229,7 +229,7 @@ async function addToCart(accountId) {
   }
 
   try {
-    const res = await api.post('/cart', { account_id: accountId });
+    const res = await api.post('/cart', { account_id: accountId, quantity });
     showToast(res.message, 'success');
     updateCartCount();
   } catch (err) {

@@ -147,6 +147,21 @@ async function deleteAccount(id) {
 
 let editingAccountId = null;
 
+function toggleCredentialFields() {
+  const typeStr = document.querySelector('select[name="type"]').value;
+  if (typeStr === 'bulk') {
+    document.getElementById('unique-cred-fields').classList.add('d-none');
+    document.getElementById('bulk-cred-fields').classList.remove('d-none');
+    document.querySelector('input[name="acc_username"]').removeAttribute('required');
+    document.querySelector('input[name="acc_password"]').removeAttribute('required');
+  } else {
+    document.getElementById('unique-cred-fields').classList.remove('d-none');
+    document.getElementById('bulk-cred-fields').classList.add('d-none');
+    document.querySelector('input[name="acc_username"]').setAttribute('required', 'true');
+    document.querySelector('input[name="acc_password"]').setAttribute('required', 'true');
+  }
+}
+
 function openAccountModal(id = null) {
   const modal = document.getElementById('accountModal');
   const title = document.getElementById('modalTitle');
@@ -172,10 +187,20 @@ function openAccountModal(id = null) {
       form.server.value = acc.server;
       form.status.value = acc.status;
       form.is_featured.value = acc.is_featured;
+      form.type.value = acc.type || 'unique';
       form.description.value = acc.description;
       form.acc_username.value = acc.acc_username || '';
       form.acc_password.value = acc.acc_password || '';
       form.acc_email.value = acc.acc_email || '';
+      form.bulk_credentials.value = '';
+      
+      const stockInfo = document.getElementById('bulk-stock-info');
+      if (acc.type === 'bulk') {
+        stockInfo.textContent = `Sản phẩm này đang có ${acc.stock} tài khoản trong kho. Dán thêm acc vào ô trên để NẠP THÊM (tồn kho sẽ cộng dồn).`;
+      } else {
+        stockInfo.textContent = '';
+      }
+      toggleCredentialFields();
     }).catch(err => {
       showToast(err.message, 'error');
       closeModal();
@@ -183,6 +208,9 @@ function openAccountModal(id = null) {
     });
   } else {
     title.textContent = 'Thêm tài khoản mới';
+    form.type.value = 'unique';
+    document.getElementById('bulk-stock-info').textContent = '';
+    toggleCredentialFields();
   }
 
   modal.classList.add('show');
@@ -209,6 +237,8 @@ document.getElementById('accountForm')?.addEventListener('submit', async (e) => 
     status: form.status.value,
     is_featured: parseInt(form.is_featured.value),
     description: form.description.value,
+    type: form.type.value,
+    bulk_credentials: form.bulk_credentials.value.trim() || null,
     acc_username: form.acc_username.value.trim() || null,
     acc_password: form.acc_password.value.trim() || null,
     acc_email: form.acc_email.value.trim() || null,
