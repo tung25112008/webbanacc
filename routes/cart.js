@@ -42,7 +42,7 @@ module.exports = function(db) {
     }
 
     if (account.type === 'bulk' && reqQty > account.stock) {
-      return res.status(400).json({ error: \`Số lượng yêu cầu vượt quá tồn kho (\${account.stock})\` });
+      return res.status(400).json({ error: `Số lượng yêu cầu vượt quá tồn kho (${account.stock})` });
     }
     
     // Check not already in cart
@@ -51,7 +51,7 @@ module.exports = function(db) {
       if (account.type === 'bulk') {
         const newQty = existing.quantity + reqQty;
         if (newQty > account.stock) {
-          return res.status(400).json({ error: \`Tổng số lượng trong giỏ vượt quá tồn kho (\${account.stock})\` });
+          return res.status(400).json({ error: `Tổng số lượng trong giỏ vượt quá tồn kho (${account.stock})` });
         }
         db.prepare('UPDATE cart_items SET quantity = ? WHERE id = ?').run(newQty, existing.id);
       } else {
@@ -78,7 +78,7 @@ module.exports = function(db) {
     }
 
     if (account.type === 'bulk' && reqQty > account.stock) {
-      return res.status(400).json({ error: \`Số lượng yêu cầu vượt quá tồn kho (\${account.stock})\` });
+      return res.status(400).json({ error: `Số lượng yêu cầu vượt quá tồn kho (${account.stock})` });
     }
 
     db.prepare('UPDATE cart_items SET quantity = ? WHERE account_id = ? AND user_id = ?').run(account.type === 'bulk' ? reqQty : 1, req.params.id, req.user.id);
